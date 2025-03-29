@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Runtime files
+*.log
+*.pyc
+
+# Sensitive files
+devsecret.sh
+
+# Queued tasks
+*.task
