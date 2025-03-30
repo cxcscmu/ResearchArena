@@ -16,6 +16,10 @@ def main():
     if load_file.suffix != ".jsonl":
         raise NotImplementedError("Only 'jsonl' files are read.")
 
+    logging.info(f"Connecting to Elasticsearch.")
+    pool = [Elasticsearch(f"http://{host}:9200") for host in os.getenv("HOSTNAMES").split(",")]
+    assert len(pool) > 0, "No Elasticsearch hosts specified."
+
     logging.info(f"Reading the corpus from {load_file}.")
     ids, corpus = list(), list()
     with load_file.open("r") as fp:
@@ -24,9 +28,6 @@ def main():
             if parsed.read_from in data:
                 ids.append(data["id"])
                 corpus.append(data[parsed.read_from])
-
-    logging.info(f"Connecting to Elasticsearch.")
-    pool = [Elasticsearch(f"http://{host}:9200") for host in os.getenv("HOSTNAMES").split(",")]
 
     logging.info(f"Preparing the BM25 indexing into {load_file}.")
     batch_size = 32
