@@ -29,7 +29,7 @@ def main():
     pool = [Elasticsearch(f"http://{host}:9200") for host in os.getenv("HOSTNAMES").split(",")]
 
     logging.info(f"Preparing the BM25 indexing into {load_file}.")
-    batch_size = 256
+    batch_size = 32
     for i in range(0, len(corpus), batch_size):
         batch_ids = ids[i:i + batch_size]
         batch_texts = corpus[i:i + batch_size]
@@ -42,7 +42,7 @@ def main():
             }
             for doc_id, text in zip(batch_ids, batch_texts)
         ]
-        helpers.bulk(pool[i % len(pool)], actions)
+        helpers.bulk(pool[i % len(pool)], actions, request_timeout=60)
 
 
 if __name__ == "__main__":
