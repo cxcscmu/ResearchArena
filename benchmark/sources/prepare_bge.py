@@ -22,11 +22,13 @@ def main():
         raise NotImplementedError("Only 'npy' files are saved.")
 
     logging.info(f"Reading the corpus from {load_file}.")
-    corpus = list()
+    corpus, ids = list(), list()
     with load_file.open("r") as fp:
         for line in fp:
             data = json.loads(line)
-            corpus.append(data[parsed.read_from])
+            if parsed.read_from in data:
+                ids.append(data["id"])
+                corpus.append(data[parsed.read_from])
 
     logging.info("Loading the dense embedding model.")
     engine = LLM("BAAI/bge-base-en-v1.5")
@@ -43,8 +45,9 @@ def main():
         vectors.extend([x.outputs.embedding for x in outputs])
 
     logging.info(f"Saving the vectors into {save_file}.")
+    ids, vectors = np.array(ids), np.array(vectors, dtype=np.float32)
     with save_file.open("wb") as fp:
-        np.save(fp, np.array(vectors))
+        np.savez(fp, ids=ids, vectors=vectors)
 
 if __name__ == '__main__':
     main()
