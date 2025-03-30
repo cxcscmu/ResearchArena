@@ -1,9 +1,10 @@
+import json
 import logging
 import argparse
 from pathlib import Path
 
 import numpy as np
-from vllm import LLM
+from vllm import LLM, TokensPrompt
 
 def main():
     parser = argparse.ArgumentParser()
@@ -14,26 +15,36 @@ def main():
 
     load_file = Path(parsed.load_file)
     if load_file.suffix != ".jsonl":
-        raise NotImplementedError("Only 'jsonl' files are allowed.")
+        raise NotImplementedError("Only 'jsonl' files are read.")
 
     save_file = Path(parsed.save_file)
     if save_file.suffix != ".npy":
-        raise NotImplementedError("Only 'jsonl' files are allowed.")
-
-    engine = LLM("BAAI/bge-base-en-v1.5")
+        raise NotImplementedError("Only 'npy' files are saved.")
 
     logging.info(f"Reading the corpus from {load_file}.")
-    prompts = list()
+    corpus = list()
     with load_file.open("r") as fp:
         for line in fp:
             data = json.loads(line)
-            prompts.append(data[parsed.read_from])
+            corpus.append(data[parsed.read_from])
 
-    outputs = engine.embed(prompts)
+    logging.info("Loading the dense embedding model.")
+    engine = LLM("BAAI/bge-base-en-v1.5")
+    tokenizer = engine.get_tokenizer()
+    max_length = tokenizer.model_max_length
 
-    embeddings_array = np.vstack([x.outputs.embedding for x in outputs])
-    print(embeddings_array)
+    logging.info("Computing the embeddings.")
+    batch_size, vectors = 8192, []
+    for i in range(0, len(corpus), batch_size):
+        corpus_batch = corpus[i:i+batch_size]
+        logging.info(f"Processing batch {i}-{i+batch_size} out of {len(corpus)} records...")
+        prompts = tokenizer.batch_encode_plus(corpus_batch, truncation=True, max_length=max_length)
+        outputs = engine.embed(list(map(lambda x: TokensPrompt(prompt_token_ids=x), prompts['input_ids'])))
+        vectors.extend([x.outputs.embedding for x in outputs])
 
+    logging.info(f"Saving the vectors into {save_file}.")
+    with save_file.open("wb") as fp:
+        np.save(fp, np.array(vectors))
 
 if __name__ == '__main__':
     main()

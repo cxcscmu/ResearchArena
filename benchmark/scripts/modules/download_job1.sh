@@ -95,6 +95,6 @@ files=(
 for file in ${files[@]}; do
     task=$QUEUE/$file.task
     echo https://huggingface.co/datasets/haok1402/ResearchArena/resolve/main/$file >> $task
-    echo $SSD_MOUNT/dataset/$file >> $task
+    echo $SSD_MOUNT/dataset/source/$file >> $task
     echo "Added $file to the queue."
 done

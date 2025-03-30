@@ -9,6 +9,7 @@ download() {
     # Read the link and the path to save the file
     link=$(sed -n '1p' $task)
     path=$(sed -n '2p' $task)
+    mkdir -p $(dirname $path)
 
     # Download from HuggingFace (max 3 attempts)
     for i in {1..3}; do
@@ -34,8 +35,6 @@ source devsecret.sh
 
 export -f download
 export QUEUE=$NFS_MOUNT/queue/benchmark/download
-export DATASET_PATH=$SSD_MOUNT/dataset
-mkdir -p $DATASET_PATH
 
 find $QUEUE -type f -name "*.task" | sort | while read -r line; do
     flock -n $line -c "download $line" || true
