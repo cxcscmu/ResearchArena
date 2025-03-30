@@ -42,7 +42,8 @@ def main():
             }
             for doc_id, text in zip(batch_ids, batch_texts)
         ]
-        helpers.bulk(pool[i % len(pool)], actions, request_timeout=60)
+        client = pool[i % len(pool)].options(request_timeout=60)
+        helpers.bulk(client, actions)
 
 
 if __name__ == "__main__":

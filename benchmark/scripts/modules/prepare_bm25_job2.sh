@@ -6,7 +6,7 @@
 #SBATCH --partition=general
 
 #SBATCH --array=0-3
-#SBATCH --ntasks=1
+#SBATCH --ntasks=2
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 
