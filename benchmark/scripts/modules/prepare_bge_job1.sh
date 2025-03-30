@@ -22,27 +22,27 @@ mkdir -p $QUEUE
 
 find $SSD_MOUNT/dataset/source -type f -name "public_*.jsonl" | while read -r path; do
     stem=$(basename ${path%.jsonl})
-    task=$QUEUE/${stem}_title.task
+    task=$QUEUE/${stem}-title.task
     echo $path >> $task
     echo title >> $task
-    echo $SSD_MOUNT/dataset/bge_title/${stem}.npy >> $task
+    echo $SSD_MOUNT/dataset/bge-title/${stem}.npy >> $task
     echo "Added $task to queue"
 done
 
 find $SSD_MOUNT/dataset/source -type f -name "public_*.jsonl" | while read -r path; do
     stem=$(basename ${path%.jsonl})
-    task=$QUEUE/${stem}_abstract.task
+    task=$QUEUE/${stem}-abstract.task
     echo $path >> $task
     echo abstract >> $task
-    echo $SSD_MOUNT/dataset/bge_abstract/${stem}.npy >> $task
+    echo $SSD_MOUNT/dataset/bge-abstract/${stem}.npy >> $task
     echo "Added $task to queue"
 done
 
 find $SSD_MOUNT/dataset/source -type f -name "corpus_*.jsonl" | while read -r path; do
     stem=$(basename ${path%.jsonl})
-    task=$QUEUE/${stem}_text.task
+    task=$QUEUE/${stem}-text.task
     echo $path >> $task
     echo text >> $task
-    echo $SSD_MOUNT/dataset/bge_text/${stem}.npy >> $task
+    echo $SSD_MOUNT/dataset/bge-text/${stem}.npy >> $task
     echo "Added $task to queue"
 done
