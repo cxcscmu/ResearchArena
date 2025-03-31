@@ -27,16 +27,16 @@ python3 -m sources.retrieve_title \
 python3 -m sources.retrieve_bm25 \
     --queries-file $SSD_MOUNT/benchmark/retrieve_title/queries.jsonl \
     --query-field title \
-    --results-file $SSD_MOUNT/benchmark/retrieve_title/bm25_title/results.trec
+    --results-file $SSD_MOUNT/benchmark/retrieve_title/bm25_title_results.trec
 
 # Retrieve from the abstract field.
 python3 -m sources.retrieve_bm25 \
     --queries-file $SSD_MOUNT/benchmark/retrieve_title/queries.jsonl \
     --query-field abstract \
-    --results-file $SSD_MOUNT/benchmark/retrieve_title/bm25_abstract/results.trec
+    --results-file $SSD_MOUNT/benchmark/retrieve_title/bm25_abstract_results.trec
 
 # Retrieve from the text field.
 python3 -m sources.retrieve_bm25 \
     --queries-file $SSD_MOUNT/benchmark/retrieve_title/queries.jsonl \
     --query-field text \
-    --results-file $SSD_MOUNT/benchmark/retrieve_title/bm25_text/results.trec
+    --results-file $SSD_MOUNT/benchmark/retrieve_title/bm25_text_results.trec
