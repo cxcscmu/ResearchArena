@@ -22,8 +22,8 @@ prepare_bm25() {
         fi
     done
 
-    # # Mark task as completed
-    # > $task
+    # Mark task as completed
+    > $task
 }
 
 source devconfig.sh
