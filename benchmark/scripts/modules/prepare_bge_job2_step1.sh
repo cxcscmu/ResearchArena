@@ -9,15 +9,13 @@ prepare_bge() {
     # Read the parameters from the task file
     local load_file=$(sed -n '1p' $task)
     local read_from=$(sed -n '2p' $task)
-    local save_file=$(sed -n '3p' $task)
 
     # Generate the embedding (max 3 attempts)
     cd benchmark
     for i in {1..3}; do
         echo "Embed $read_from field of $load_file (Attempt $i of 3)"
-        mkdir -p $(dirname $save_file)
         CUDA_VISIBLE_DEVICES=$SLURM_PROCID python3 -m sources.prepare_bge \
-            --load-file $load_file --read-from $read_from --save-file $save_file && break
+            --load-file $load_file --read-from $read_from && break
         echo "Failed to embed $read_from field of $load_file, retrying..." && sleep 5
         if [ $i -eq 3 ]; then
             echo "ERROR: Failed to embed $read_from field of $load_file after 3 attempts." >&2
