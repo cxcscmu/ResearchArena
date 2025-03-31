@@ -49,4 +49,5 @@ sbatch benchmark/scripts/modules/run_elasticsearch.sh
 export HOSTNAMES=babel-0-31,babel-4-1,babel-9-7,babel-9-11
 
 sbatch benchmark/scripts/retrieve_bm25_title.sh
+sbatch benchmark/scripts/retrieve_bm25_zeroshot_openai.sh
 ```

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=retrieve_title
+#SBATCH --job-name=retrieve_bm25_title
 #SBATCH --output=logs/%x-%j.log
 #SBATCH --time=2-00:00:00
 #SBATCH --partition=general
@@ -13,6 +13,9 @@ source devconfig.sh
 source devsecret.sh
 
 cd benchmark
+mkdir -p $SSD_MOUNT/benchmark/retrieve_title/bm25_title
+mkdir -p $SSD_MOUNT/benchmark/retrieve_title/bm25_abstract
+mkdir -p $SSD_MOUNT/benchmark/retrieve_title/bm25_text
 
 # Prepare the queries.
 python3 -m sources.retrieve_title \
