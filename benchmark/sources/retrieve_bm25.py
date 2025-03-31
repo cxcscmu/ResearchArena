@@ -57,6 +57,9 @@ def main():
 
         # parse the response into trec_eval format
         for qid, res in zip(batch_ids, response["responses"]):
+            if "hits" not in res or "hits" not in res["hits"]:
+                logging.warning(f"No hits found for query ID {qid}. Response: {res}")
+                continue
             for rank, hit in enumerate(res["hits"]["hits"]):
                 results.append(
                     "{qid} Q0 {docno} {rank} {sim} {run_id}".format(
