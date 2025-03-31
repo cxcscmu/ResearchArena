@@ -48,5 +48,5 @@ sbatch benchmark/scripts/modules/run_elasticsearch.sh
 # Please use squeue to find out what nodes the previous job has been dispatched on.
 export HOSTNAMES=babel-0-31,babel-4-1,babel-9-7,babel-9-11
 
-bash benchmark/scripts/retrieve_bm25_title.sh
+sbatch benchmark/scripts/retrieve_bm25_title.sh
 ```
