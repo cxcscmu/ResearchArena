@@ -4,27 +4,38 @@ import argparse
 import asyncio
 from pathlib import Path
 
-from openai import AsyncOpenAI
-from openai import RateLimitError, APIError, Timeout
+from aioboto3 import Session
 from tenacity import retry, stop_after_attempt, wait_random_exponential, retry_if_exception_type
 
 prompt_template = """Create a search query that gathers supporting materials for writing a survey paper on the following topic: {title}. Just show the query without any explanation.
 """
 
 @retry(
-    retry=retry_if_exception_type((RateLimitError, APIError, Timeout)),
+    retry=retry_if_exception_type((Exception)),
     wait=wait_random_exponential(min=1, max=60),
     stop=stop_after_attempt(6),
 )
-async def generate_response(client: AsyncOpenAI, prompt: str):
-    response = await client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        seed=42,
-        temperature=0,
-        max_tokens=512,
-    )
-    return response.choices[0].message.content
+async def generate_response(session: Session, prompt: str):
+    async with session.client('bedrock-runtime', region_name="us-east-1") as client:
+        messages = [
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": prompt}]
+            }
+        ]
+        payload = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "messages": messages,
+            "max_tokens": 512,
+            "temperature": 0,
+        }
+        response = await client.invoke_model(
+            modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
+            body=json.dumps(payload),
+            contentType='application/json'
+        )
+        result = await response['body'].read()
+        return json.loads(result)['content'][0]['text']
 
 async def main():
     parser = argparse.ArgumentParser()
@@ -63,14 +74,14 @@ async def main():
                 fp.write(f"{qids} Q0 {docno} 1\n")
 
     logging.info(f"Writing the queries to {queries_file}.")
-    batch_size, client = 32, AsyncOpenAI()
+    batch_size, session = 32, Session()
     with queries_file.open("w") as fp:
         for i in range(0, len(ids), batch_size):
             batch_ids = ids[i:i + batch_size]
             batch_titles = titles[i:i + batch_size]
             batch_prompts = [prompt_template.format(title=title) for title in batch_titles]
             logging.info(f"Processing batch {i}-{i+batch_size} out of {len(ids)} records...")
-            batch_queries = await asyncio.gather(*[generate_response(client, prompt) for prompt in batch_prompts])
+            batch_queries = await asyncio.gather(*[generate_response(session, prompt) for prompt in batch_prompts])
             for id, query in zip(batch_ids, batch_queries):
                 json.dump({"id": id, "query": query}, fp)
                 fp.write("\n")

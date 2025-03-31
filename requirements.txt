@@ -2,3 +2,4 @@ vllm
 elasticsearch
 tenacity
 openai
+boto3
