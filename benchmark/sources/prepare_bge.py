@@ -18,8 +18,8 @@ def main():
         raise NotImplementedError("Only 'jsonl' files are read.")
 
     save_file = Path(parsed.save_file)
-    if save_file.suffix != ".npy":
-        raise NotImplementedError("Only 'npy' files are saved.")
+    if save_file.suffix != ".npz":
+        raise NotImplementedError("Only 'npz' files are saved.")
 
     logging.info(f"Reading the corpus from {load_file}.")
     corpus, ids = list(), list()
