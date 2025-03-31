@@ -30,7 +30,7 @@ def main():
                 corpus.append(data[parsed.read_from])
 
     logging.info(f"Preparing the BM25 indexing into {load_file}.")
-    batch_size = 32
+    batch_size = 128
     for i in range(0, len(corpus), batch_size):
         batch_ids = ids[i:i + batch_size]
         batch_texts = corpus[i:i + batch_size]
