@@ -1,3 +1,4 @@
 vllm
 elasticsearch
 tenacity
+openai
