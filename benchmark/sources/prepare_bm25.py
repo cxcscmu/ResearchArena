@@ -43,7 +43,7 @@ def main():
             }
             for doc_id, text in zip(batch_ids, batch_texts)
         ]
-        client = pool[i % len(pool)].options(request_timeout=60)
+        client = pool[i % len(pool)].options(request_timeout=65536)
         helpers.bulk(client, actions)
 
 
