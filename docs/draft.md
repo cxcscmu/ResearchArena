@@ -52,3 +52,40 @@ sbatch benchmark/scripts/retrieve_bm25_title.sh
 sbatch benchmark/scripts/retrieve_bm25_zeroshot_openai.sh
 sbatch benchmark/scripts/retrieve_bm25_decomposer_openai.sh
 ```
+
+```bash
+curl -X PUT "http://babel-0-31:9200/papers-semantic" -H 'Content-Type: application/json' -d '
+{
+  "settings": {
+    "number_of_shards": 4
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "dense_vector",
+        "dims": 768,
+        "index": true,
+        "similarity": "dot_product"
+      },
+      "abstract": {
+        "type": "dense_vector",
+        "dims": 768,
+        "index": true,
+        "similarity": "dot_product"
+      },
+      "text": {
+        "type": "dense_vector",
+        "dims": 768,
+        "index": true,
+        "similarity": "dot_product"
+      }
+    }
+  }
+}'
+
+export HOSTNAMES=babel-0-31,babel-4-1,babel-9-7,babel-9-11
+
+bash benchmark/scripts/prepare_bge.sh
+# If the above is taking a while... you can have more tasks joined dynamically in preempt mode!!!
+sbatch --partition=preempt benchmark/scripts/modules/prepare_bge_job2.sh
+```
