@@ -67,9 +67,14 @@ def main():
     logging.info(f"Writing the results to {parsed.results_file}.")
     with results_file.open("w") as fp:
         for qid, res in results.items():
-            res.sort(key=lambda x: x["sim"], reverse=True)
-            res = res[:100]
-            for rank, hit in enumerate(res):
+            uniques, seen = [], set()
+            for r in sorted(res, key=lambda x: x["sim"], reverse=True):
+                if r["docno"] not in seen:
+                    uniques.append(r)
+                    seen.add(r["docno"])
+                if len(uniques) >= 100:
+                    break
+            for rank, hit in enumerate(uniques):
                 fp.write(
                     "{qid} Q0 {docno} {rank} {sim} {run_id}\n".format(
                         qid=qid,
