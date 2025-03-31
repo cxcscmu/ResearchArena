@@ -34,7 +34,7 @@ def main():
                 queries.append(data["query"])
 
     logging.info(f"Retrieving the references via BM25.")
-    batch_size, j, results = 32, 0, list()
+    batch_size, j, results = 8, 0, list()
     for i in range(0, len(queries), batch_size):
         batch_ids = ids[i:i + batch_size]
         batch_texts = queries[i:i + batch_size]
