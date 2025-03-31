@@ -3,6 +3,7 @@ import json
 import logging
 import argparse
 from pathlib import Path
+from collections import defaultdict
 
 from elasticsearch import Elasticsearch
 
@@ -34,7 +35,7 @@ def main():
                 queries.append(data["query"])
 
     logging.info(f"Retrieving the references via BM25.")
-    batch_size, j, results = 8, 0, list()
+    batch_size, j, results = 8, 0, defaultdict(list)
     for i in range(0, len(queries), batch_size):
         batch_ids = ids[i:i + batch_size]
         batch_texts = queries[i:i + batch_size]
@@ -60,21 +61,24 @@ def main():
             if "hits" not in res or "hits" not in res["hits"]:
                 logging.warning(f"No hits found for query ID {qid}. Response: {res}")
                 continue
-            for rank, hit in enumerate(res["hits"]["hits"]):
-                results.append(
-                    "{qid} Q0 {docno} {rank} {sim} {run_id}".format(
-                        qid=qid,
-                        docno=hit["_id"],
-                        rank=rank + 1,
-                        sim=hit["_score"],
-                        run_id=f"bm25-{parsed.query_field}"
-                    )
-                )
+            for hit in res["hits"]["hits"]:
+                results[qid].append({"docno": hit["_id"], "sim": hit["_score"]})
 
     logging.info(f"Writing the results to {parsed.results_file}.")
     with results_file.open("w") as fp:
-        for res in results:
-            fp.write(res + "\n")
+        for qid, res in results.items():
+            res.sort(key=lambda x: x["sim"], reverse=True)
+            res = res[:100]
+            for rank, hit in enumerate(res):
+                fp.write(
+                    "{qid} Q0 {docno} {rank} {sim} {run_id}\n".format(
+                        qid=qid,
+                        docno=hit["docno"],
+                        rank=rank + 1,
+                        sim=hit["sim"],
+                        run_id=f"bm25-{parsed.query_field}"
+                    )
+                )
 
 if __name__ == "__main__":
     main()
