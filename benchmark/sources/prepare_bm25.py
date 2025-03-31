@@ -30,7 +30,7 @@ def main():
                 corpus.append(data[parsed.read_from])
 
     logging.info(f"Preparing the BM25 indexing into {load_file}.")
-    batch_size = 512
+    batch_size, j = 512, 0
     for i in range(0, len(corpus), batch_size):
         batch_ids = ids[i:i + batch_size]
         batch_texts = corpus[i:i + batch_size]
@@ -43,7 +43,7 @@ def main():
             }
             for doc_id, text in zip(batch_ids, batch_texts)
         ]
-        client = pool[i % len(pool)].options(request_timeout=65536)
+        client = pool[(j := j + 1) % len(pool)].options(request_timeout=65536)
         helpers.bulk(client, actions)
 
 
