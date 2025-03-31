@@ -20,7 +20,7 @@ cd benchmark
 # Prepare the queries.
 python3 -m sources.retrieve_decomposer_claude \
     --surveys-file $SSD_MOUNT/dataset/source/survey.jsonl \
-    --replays-file $SSD_MOUNT/dataset/source/replays.jsonl \
+    --replays-file $WORKSPACE/replays.jsonl \
     --queries-file $WORKSPACE/queries.jsonl \
     --records-file $WORKSPACE/records.trec
 
