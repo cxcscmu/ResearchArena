@@ -37,4 +37,6 @@ curl -X PUT "http://babel-0-31:9200/papers" -H 'Content-Type: application/json' 
 }'
 
 bash benchmark/scripts/prepare_bm25.sh
+# If the above is taking a while... you can have more tasks joined dynamically in preempt mode!!!
+sbatch --partition=preempt benchmark/scripts/modules/prepare_bm25_job2.sh
 ```
