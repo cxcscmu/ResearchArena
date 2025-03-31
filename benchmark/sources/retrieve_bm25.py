@@ -32,8 +32,6 @@ def main():
             if "query" in data:
                 ids.append(data["id"])
                 queries.append(data["query"])
-            if len(queries) >= 64:
-                break
 
     logging.info(f"Retrieving the references via BM25.")
     batch_size, j, results = 32, 0, list()

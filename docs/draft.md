@@ -40,3 +40,11 @@ bash benchmark/scripts/prepare_bm25.sh
 # If the above is taking a while... you can have more tasks joined dynamically in preempt mode!!!
 sbatch --partition=preempt benchmark/scripts/modules/prepare_bm25_job2.sh
 ```
+
+```bash
+sbatch benchmark/scripts/modules/run_elasticsearch.sh
+# Please use squeue to find out what nodes the previous job has been dispatched on.
+export HOSTNAMES=babel-0-31,babel-4-1,babel-9-7,babel-9-11
+
+bash benchmark/scripts/retrieve_bm25_title.sh
+```

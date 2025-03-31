@@ -6,7 +6,6 @@
 #SBATCH --partition=general
 
 #SBATCH --nodes=4
-#SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=512G
 
