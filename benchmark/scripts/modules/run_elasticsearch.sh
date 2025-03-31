@@ -10,4 +10,4 @@
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=512G
 
-srun -W 0 benchmark/scripts/modules/run_elastic_search_step1.sh
+srun -W 0 benchmark/scripts/modules/run_elasticsearch_step1.sh

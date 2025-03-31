@@ -17,7 +17,7 @@ bash benchmark/scripts/prepare_bge.sh
 # If the above is taking a while... you can have more tasks joined dynamically in preempt mode!!!
 sbatch --partition=preempt benchmark/scripts/modules/prepare_bge_job2.sh
 
-sbatch benchmark/scripts/modules/run_elastic_search.sh
+sbatch benchmark/scripts/modules/run_elasticsearch.sh
 # Please use squeue to find out what nodes the previous job has been dispatched on.
 export HOSTNAMES=babel-0-31,babel-8-17,babel-9-7,babel-9-11
 
