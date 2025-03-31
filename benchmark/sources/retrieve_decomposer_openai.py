@@ -107,7 +107,6 @@ async def main():
                 titles.append(data["title"])
                 influentials.append(data["references"]["influential"])
                 relevants.append(data["references"]["relevant"])
-            break
 
     logging.info(f"Writing the records to {records_file}.")
     with records_file.open("w") as fp:
