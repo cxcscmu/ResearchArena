@@ -14,32 +14,26 @@ source devsecret.sh
 
 cd benchmark
 
-# Retrieve from the title field.
+# Prepare the queries.
 python3 -m sources.retrieve_bm25_title \
     --surveys-file $SSD_MOUNT/dataset/source/survey.jsonl \
-    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/title/queries.jsonl \
+    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/queries.jsonl \
     --records-file $SSD_MOUNT/benchmark/retrieve_bm25_title/title/records.trec
+
+# Retrieve from the title field.
 python3 -m sources.retrieve_bm25 \
-    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/title/queries.jsonl \
+    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/queries.jsonl \
     --query-field title \
     --results-file $SSD_MOUNT/benchmark/retrieve_bm25_title/title/results.trec
 
 # Retrieve from the abstract field.
-python3 -m sources.retrieve_bm25_title \
-    --surveys-file $SSD_MOUNT/dataset/source/survey.jsonl \
-    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/abstract/queries.jsonl \
-    --records-file $SSD_MOUNT/benchmark/retrieve_bm25_title/abstract/records.trec
 python3 -m sources.retrieve_bm25 \
-    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/abstract/queries.jsonl \
+    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/queries.jsonl \
     --query-field abstract \
     --results-file $SSD_MOUNT/benchmark/retrieve_bm25_title/abstract/results.trec
 
 # Retrieve from the title field.
-python3 -m sources.retrieve_bm25_title \
-    --surveys-file $SSD_MOUNT/dataset/source/survey.jsonl \
-    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/text/queries.jsonl \
-    --records-file $SSD_MOUNT/benchmark/retrieve_bm25_title/text/records.trec
 python3 -m sources.retrieve_bm25 \
-    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/text/queries.jsonl \
+    --queries-file $SSD_MOUNT/benchmark/retrieve_bm25_title/queries.jsonl \
     --query-field text \
     --results-file $SSD_MOUNT/benchmark/retrieve_bm25_title/text/results.trec
