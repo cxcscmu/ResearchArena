@@ -89,3 +89,12 @@ bash benchmark/scripts/prepare_bge.sh
 # If the above is taking a while... you can have more tasks joined dynamically in preempt mode!!!
 sbatch --partition=preempt benchmark/scripts/modules/prepare_bge_job2.sh
 ```
+
+```bash
+export HOSTNAMES=babel-0-23,babel-0-31,babel-9-7,babel-9-11
+sbatch benchmark/scripts/retrieve_bge_title.sh
+sbatch benchmark/scripts/retrieve_bge_zeroshot_openai.sh
+sbatch benchmark/scripts/retrieve_bge_zeroshot_claude.sh
+sbatch benchmark/scripts/retrieve_bge_decomposer_openai.sh
+sbatch benchmark/scripts/retrieve_bge_decomposer_claude.sh
+```

@@ -1,0 +1,112 @@
+import os
+import json
+import logging
+import argparse
+from pathlib import Path
+from collections import defaultdict
+from typing import List
+
+import numpy as np
+from vllm import LLM, TokensPrompt
+from elasticsearch import Elasticsearch
+
+def normalize(vector: List[float]) -> List[float]:
+    norm = np.linalg.norm(vector)
+    return vector / norm if norm > 0 else vector
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--queries-file", type=str, required=True)
+    parser.add_argument("--query-field", type=str, required=True)
+    parser.add_argument("--results-file", type=str, required=True)
+    parsed = parser.parse_args()
+
+    queries_file = Path(parsed.queries_file)
+    if queries_file.suffix != ".jsonl":
+        raise NotImplementedError("Only 'jsonl' files are read.")
+    results_file = Path(parsed.results_file)
+    if results_file.suffix != ".trec":
+        raise NotImplementedError("Only 'trec' files are written.")
+
+    logging.info(f"Connecting to Elasticsearch.")
+    pool = [Elasticsearch(f"http://{host}:9200") for host in os.getenv("HOSTNAMES").split(",")]
+    assert len(pool) > 0, "No Elasticsearch hosts specified."
+
+    logging.info(f"Reading the queries from {queries_file}.")
+    ids, queries = list(), list()
+    with queries_file.open("r") as fp:
+        for line in fp:
+            data = json.loads(line)
+            if "query" in data:
+                ids.append(data["id"])
+                queries.append(data["query"])
+
+    logging.info("Loading the dense embedding model.")
+    engine = LLM("BAAI/bge-base-en-v1.5")
+    tokenizer = engine.get_tokenizer()
+    max_length = tokenizer.model_max_length
+
+    logging.info(f"Retrieving the references via BM25.")
+    source = f"""
+        if (doc['{parsed.query_field}'].size() == 0) {{ return 0.0; }}
+        return dotProduct(params.query_vector, '{parsed.query_field}') + 1.0;
+    """
+    batch_size, j, results = 32, 0, defaultdict(list)
+    for i in range(0, len(queries), batch_size):
+        batch_ids = ids[i:i + batch_size]
+        batch_texts = queries[i:i + batch_size]
+        logging.info(f"Processing batch {i}-{i+batch_size} out of {len(queries)} records...")
+        batch_prompts = tokenizer.batch_encode_plus(batch_texts, truncation=True, max_length=max_length)
+        batch_outputs = engine.embed(list(map(lambda x: TokensPrompt(prompt_token_ids=x), batch_prompts['input_ids'])))
+        batch_vectors = [normalize(x.outputs.embedding) for x in batch_outputs]
+
+        batch_requests = []
+        for vector in batch_vectors:
+            batch_requests.append({ "index": "papers-semantic" })
+            batch_requests.append({
+                "size": 100,
+                "_source": False,
+                "query": {
+                    "script_score": {
+                        "query": {"match_all": {}},
+                        "script": {
+                            "source": source,
+                            "params": {"query_vector": vector}
+                        }
+                    }
+                }
+            })
+        client = pool[(j := j + 1) % len(pool)].options(request_timeout=65536)
+        response = client.msearch(body=batch_requests)
+
+        # parse the response into trec_eval format
+        for qid, res in zip(batch_ids, response["responses"]):
+            if "hits" not in res or "hits" not in res["hits"]:
+                logging.warning(f"No hits found for query ID {qid}. Response: {res}")
+                continue
+            for hit in res["hits"]["hits"]:
+                results[qid].append({"docno": hit["_id"], "sim": hit["_score"]})
+
+    logging.info(f"Writing the results to {parsed.results_file}.")
+    with results_file.open("w") as fp:
+        for qid, res in results.items():
+            uniques, seen = [], set()
+            for r in sorted(res, key=lambda x: x["sim"], reverse=True):
+                if r["docno"] not in seen:
+                    uniques.append(r)
+                    seen.add(r["docno"])
+                if len(uniques) >= 100:
+                    break
+            for rank, hit in enumerate(uniques):
+                fp.write(
+                    "{qid} Q0 {docno} {rank} {sim} {run_id}\n".format(
+                        qid=qid,
+                        docno=hit["docno"],
+                        rank=rank + 1,
+                        sim=hit["sim"],
+                        run_id=f"bm25-{parsed.query_field}"
+                    )
+                )
+
+if __name__ == "__main__":
+    main()
