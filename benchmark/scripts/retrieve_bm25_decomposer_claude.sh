@@ -28,16 +28,16 @@ python3 -m sources.retrieve_decomposer_claude \
 python3 -m sources.retrieve_bm25 \
     --queries-file $WORKSPACE/queries.jsonl \
     --query-field title \
-    --results-file $WORKSPACE/bm25_title/results.trec
+    --results-file $WORKSPACE/bm25_title_results.trec
 
 # Retrieve from the abstract field.
 python3 -m sources.retrieve_bm25 \
     --queries-file $WORKSPACE/queries.jsonl \
     --query-field abstract \
-    --results-file $WORKSPACE/bm25_abstract/results.trec
+    --results-file $WORKSPACE/bm25_abstract_results.trec
 
 # Retrieve from the text field.
 python3 -m sources.retrieve_bm25 \
     --queries-file $WORKSPACE/queries.jsonl \
     --query-field text \
-    --results-file $WORKSPACE/bm25_text/results.trec
+    --results-file $WORKSPACE/bm25_text_results.trec
