@@ -64,14 +64,17 @@ def main():
     # A topic may have multiple queries, which requires merging results
     for qid, entries in results.items():
         entries.sort(key=lambda x: x[2])
-        results[qid] = entries[:100]
 
     # Write the results to the output file in TREC format
     with Path(parsed.results_file).open("w") as fp:
         for qid, entries in results.items():
+            seen = set()
             for rank, (qid, idx, dist) in enumerate(entries, start=1):
+                if idx in seen: continue
+                if len(seen) >= 100: break
                 sim = 1.0 / (1.0 + dist)
                 fp.write(f"{qid} Q0 {idx} {rank} {sim} bge\n")
+                seen.add(idx)
 
 if __name__ == "__main__":
     main()
