@@ -69,7 +69,7 @@ async def generate_response(session: Session, prompt: str):
     async with session.client('bedrock-runtime', region_name="us-east-1") as client:
         payload = {
             "prompt": prompt,
-            "max_tokens": 512,
+            "max_tokens": 32768,
             "temperature": 0,
         }
         response = await client.invoke_model(
@@ -132,11 +132,14 @@ async def main():
             for id, queries in zip(batch_ids, batch_queries):
                 json.dump({"id": id, "replay": queries}, fp2)
                 fp2.write("\n")
+                fp2.flush()
                 matched = queries.partition("<Queries>")[-1].strip()
                 if matched == "":
+                    logging.warning(f"No queries found for id {id}. Skipping...")
                     continue
                 matched = matched.partition("</Queries>")[0].strip()
                 if matched == "":
+                    logging.warning(f"No valid queries found for id {id}. Skipping...")
                     continue
                 for line in matched.splitlines():
                     query = line.lstrip("- ")
@@ -144,6 +147,7 @@ async def main():
                         continue
                     json.dump({"id": id, "query": query}, fp1)
                     fp1.write("\n")
+                fp1.flush()
 
 if __name__ == "__main__":
     asyncio.run(main())
