@@ -18,14 +18,14 @@ mkdir -p $WORKSPACE
 cd benchmark
 
 # Prepare the queries.
-python3 -m sources.retrieve_decomposer_deepseek \
-    --surveys-file $SSD_MOUNT/dataset/source/survey.jsonl \
-    --replays-file $WORKSPACE/replays.jsonl \
-    --queries-file $WORKSPACE/queries.jsonl \
-    --records-file $WORKSPACE/records.trec
-
-# # Retrieve from the abstract field.
-# python3 -m sources.retrieve_bm25 \
+# python3 -m sources.retrieve_decomposer_deepseek \
+#     --surveys-file $SSD_MOUNT/dataset/source/survey.jsonl \
+#     --replays-file $WORKSPACE/replays.jsonl \
 #     --queries-file $WORKSPACE/queries.jsonl \
-#     --query-field abstract \
-#     --results-file $WORKSPACE/bm25_abstract_results.trec
+#     --records-file $WORKSPACE/records.trec
+
+# Retrieve from the abstract field.
+python3 -m sources.retrieve_bm25 \
+    --queries-file $WORKSPACE/queries.jsonl \
+    --query-field abstract \
+    --results-file $WORKSPACE/bm25_abstract_results.trec
